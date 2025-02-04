@@ -7,7 +7,7 @@ public class Main {
   //this method should be called when this file is run same as c++
   int main(){
     word = "hehe";
-    logger.println(word2 + word);
+    println(word + word2);
     return 0;
   }
 }
