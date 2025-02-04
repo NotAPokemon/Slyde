@@ -1,1 +1,13 @@
-var x = 0
+// goal: get this line and following code to work
+
+public class Main {
+  string word;
+  string word2 = "this is the second word";
+
+  //this method should be called when this file is run same as c++
+  int main(){
+    word = "hehe";
+    logger.println(word2 + word);
+    return 0;
+  }
+}
