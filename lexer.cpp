@@ -19,6 +19,7 @@ enum TokenType {
     Var,
 
     END,
+    EOL,
 
     ERROR,
 
@@ -40,7 +41,8 @@ struct KeyWords{
     {BinaryOperator, "BinaryOperator"},
     {Var, "Var"},
     {END, "END"},
-    {ERROR, "ERROR"}
+    {ERROR, "ERROR"},
+    {EOL, "EOL"}
 };
 };
 
@@ -94,6 +96,8 @@ vector<Token> tokenize(string sourceCode){
             tokens.emplace_back(string(1, at), OpenBracket);
         } else if (at == '}'){
             tokens.emplace_back(string(1, at), ClosedBracket);
+        } else if (at == ';'){
+            tokens.emplace_back(string(1, at), EOL);
         } else if (at == '+' || at == '-'){
             tokens.emplace_back(string(1, at), BinaryOperator);
         } else if (at == '*' || at == '/') {
