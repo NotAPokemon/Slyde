@@ -13,7 +13,7 @@ enum TokenType {
     Identifier,
     Equals,
     OpenParentheses, ClosedParentheses,
-
+    OpenBracket, ClosedBracket,
 
     BinaryOperator,
 
@@ -36,6 +36,8 @@ struct KeyWords{
     {Equals, "Equals"},
     {OpenParentheses, "OpenParentheses"},
     {ClosedParentheses, "ClosedParentheses"},
+    {OpenBracket, "OpenBracket"},
+    {ClosedBracket, "ClosedBracket"},
     {BinaryOperator, "BinaryOperator"},
     {Var, "Var"},
     {END, "END"},
@@ -83,6 +85,10 @@ vector<Token> tokenize(string sourceCode){
             tokens.emplace_back(string(1, at), OpenParentheses);
         } else if (at == ')'){
             tokens.emplace_back(string(1, at), ClosedParentheses);
+        } else if (at == '{'){
+            tokens.emplace_back(string(1, at), OpenBracket);
+        } else if (at == '}'){
+            tokens.emplace_back(string(1, at), ClosedBracket);
         } else if (at == '+' || at == '-'){
             tokens.emplace_back(string(1, at), BinaryOperator);
         } else if (at == '*' || at == '/') {
