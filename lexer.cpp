@@ -14,7 +14,6 @@ enum TokenType {
     Equals,
     OpenParentheses, ClosedParentheses,
     OpenBracket, ClosedBracket,
-
     BinaryOperator,
 
     Var,
@@ -52,6 +51,12 @@ struct Token{
     Token(string value, TokenType type){
         this->value = value;
         this->type = type;
+    }
+
+    friend ostream& operator<<(ostream& os, const Token& token) {
+        static KeyWords keywords;  // Static instance of KeyWords to get TokenType names
+        os << '{' << token.value << ", " << keywords.TokenTypeNames[token.type] << '}';
+        return os;
     }
 };
 
@@ -169,7 +174,7 @@ int main(){
 
     vector<Token> tokens = tokenize(code);
     for (int i = 0; i < tokens.size(); i++){
-        cout << '{' << tokens.at(i).value << ',' << ((string) keywords.TokenTypeNames[tokens.at(i).type]) << "}\n";
+        cout << tokens[i] << endl;
 
     }
 
