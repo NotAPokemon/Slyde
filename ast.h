@@ -21,7 +21,10 @@ class Node{
 class ProtectionType : public Node{
 };
 
-class Literal : public Node{
+class Type : public Node{
+};
+
+class Literal : public Type{
 };
 
 class RunType : public Node{
