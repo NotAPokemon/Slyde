@@ -1,3 +1,6 @@
+#ifndef LEXER_H
+#define LEXER_H
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -11,7 +14,7 @@ using namespace std;
 enum TokenType {
     Number,
     Integer,
-    Identifier,
+    IdentifierToken,
     Equals,
     OpenParentheses, ClosedParentheses,
     OpenBracket, ClosedBracket,
@@ -20,10 +23,11 @@ enum TokenType {
     BinaryOperator,
     EOF_Token,
     SemiColon,
-    NormalRuntype,
+    Runtype,
     FileType,
     Class,
     Protection,
+    typeDecleration,
     null,
     ERROR,
 };
@@ -37,7 +41,10 @@ unordered_map<string, TokenType> keyWords = {
     {"private", TokenType::Protection},
     {"public", TokenType::Protection},
     {"protected", TokenType::Protection},
-    {"Normal", TokenType::NormalRuntype}
+    {"Normal", TokenType::Runtype},
+    {"int", TokenType::typeDecleration},
+    {"String", TokenType::typeDecleration},
+    {"Number", TokenType::typeDecleration}
 };
 
 bool isKeyWord(string word){
@@ -97,7 +104,7 @@ vector<Token> tokenize(string sourceCode){
             result.emplace_back(string(1, at), TokenType::DoubleQuotes);
         } else if (at == '+' || at == '-') {
             result.emplace_back(string(1, at), TokenType::BinaryOperator);
-        } else if (at == '*' || at == '/') {
+        } else if (at == '*' || at == '/' || at == '%') {
             result.emplace_back(string(1, at), TokenType::BinaryOperator);
         } else {
             if (isint(at)){
@@ -130,7 +137,7 @@ vector<Token> tokenize(string sourceCode){
                 if (isKeyWord(str)){
                     result.emplace_back(str, keyWords.at(str));
                 } else {
-                    result.emplace_back(str, TokenType::Identifier);
+                    result.emplace_back(str, TokenType::IdentifierToken);
                 }
                 i--;
             } else if (at == ' ' || at == '\n' || at == '\t') {
@@ -149,3 +156,4 @@ vector<Token> tokenize(string sourceCode){
 
 
 
+#endif

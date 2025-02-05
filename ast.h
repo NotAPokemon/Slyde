@@ -24,6 +24,16 @@ class ProtectionType : public Node{
 class Literal : public Node{
 };
 
+class RunType : public Node{
+};
+
+
+
+class NormalRun : public RunType{
+    public:
+    const string kind = "Normal";
+};
+
 class NumberLiteral : public Literal {
     public:
     double value;
@@ -60,12 +70,24 @@ class Identifier : public Node{
 class MainClassDef : public Node {
     public:
     const string kind = "main";
-    vector<Node> body;
-    ProtectionType protection;
+    vector<Node*> body;
+    ProtectionType* protection;
+    RunType* runtype;
     const Identifier name = Identifier("Main");
-    MainClassDef(ProtectionType pt, vector<Node> b) : protection(pt), body(b) {}
+    MainClassDef(){}
 };
 
+class BinaryExpr : public Node {
+    public:
+    string op;
+    Node* left;
+    Node* right;
+};
+
+template <typename Derived, typename Base>
+bool isInstance(Base* node) {
+    return dynamic_cast<Derived*>(node) != nullptr;
+}
 
 
 
