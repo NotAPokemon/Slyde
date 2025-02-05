@@ -10,56 +10,23 @@ using namespace std;
 
 enum TokenType {
     Number,
+    Integer,
     Identifier,
     Equals,
     OpenParentheses, ClosedParentheses,
     OpenBracket, ClosedBracket,
+    DoubleQuotes,
+    SingleQuotes,
     BinaryOperator,
-
-    Var,
-
-    END,
-    EOL,
-
+    EOF_Token,
+    SemiColon,
     ERROR,
-
-};
-
-struct KeyWords{
-    unordered_map<string, TokenType> words = {
-        {"var", Var}
-    };
-
-    unordered_map<TokenType, string> TokenTypeNames = {
-    {Number, "Number"},
-    {Identifier, "Identifier"},
-    {Equals, "Equals"},
-    {OpenParentheses, "OpenParentheses"},
-    {ClosedParentheses, "ClosedParentheses"},
-    {OpenBracket, "OpenBracket"},
-    {ClosedBracket, "ClosedBracket"},
-    {BinaryOperator, "BinaryOperator"},
-    {Var, "Var"},
-    {END, "END"},
-    {ERROR, "ERROR"},
-    {EOL, "EOL"}
-};
 };
 
 
 struct Token{
+    TokenType kind;
     string value;
-    TokenType type;
-    Token(string value, TokenType type){
-        this->value = value;
-        this->type = type;
-    }
-
-    friend ostream& operator<<(ostream& os, const Token& token) {
-        static KeyWords keywords;  // Static instance of KeyWords to get TokenType names
-        os << '{' << token.value << ", " << keywords.TokenTypeNames[token.type] << '}';
-        return os;
-    }
 };
 
 
@@ -82,105 +49,69 @@ vector<char> split(const string& src){
 }
 
 vector<Token> tokenize(string sourceCode){
-    vector<Token> tokens;
     vector<char> src = split(sourceCode);
-    KeyWords keywords;
-
+    vector<Token> result;
+    
     for (int i = 0; i < src.size(); i++){
         char at = src.at(i);
         if (at == '('){
-            tokens.emplace_back(string(1, at), OpenParentheses);
-        } else if (at == ')'){
-            tokens.emplace_back(string(1, at), ClosedParentheses);
-        } else if (at == '{'){
-            tokens.emplace_back(string(1, at), OpenBracket);
-        } else if (at == '}'){
-            tokens.emplace_back(string(1, at), ClosedBracket);
-        } else if (at == ';'){
-            tokens.emplace_back(string(1, at), EOL);
-        } else if (at == '+' || at == '-'){
-            tokens.emplace_back(string(1, at), BinaryOperator);
-        } else if (at == '*' || at == '/') {
-            tokens.emplace_back(string(1, at), BinaryOperator);
+            result.emplace_back(at, TokenType::OpenParentheses);
+        } else if (at == ')') {
+            result.emplace_back(at, TokenType::ClosedParentheses);
+        } else if (at == '{') {
+            result.emplace_back(at, TokenType::OpenBracket);
+        } else if (at == '}') {
+            result.emplace_back(at, TokenType::ClosedBracket);
+        } else if (at == ';') {
+            result.emplace_back(at, TokenType::SemiColon);
         } else if (at == '=') {
-            tokens.emplace_back(string(1, at), Equals);
+            result.emplace_back(at, TokenType::Equals);
+        } else if (at == '\''){
+            result.emplace_back(at, TokenType::SingleQuotes);
+        } else if (at == '"'){
+            result.emplace_back(at, TokenType::DoubleQuotes);
+        } else if (at == '+' || at == '-') {
+            result.emplace_back(at, TokenType::BinaryOperator);
+        } else if (at == '*' || at == '/') {
+            result.emplace_back(at, TokenType::BinaryOperator);
         } else {
-
             if (isint(at)){
                 string num = "";
-                while (isint(at) && i < src.size())
-                {
+                while (isint(at) && i < src.size()){
                     num += at;
                     i++;
-                    if (i < src.size()) at = src.at(i);
+                    at = src.at(i);
                 }
-
-                tokens.emplace_back(num, Number);
-                
-            } else if (isalpha(at)){
-                string indentifier = "";
-                while (isalpha(at) && i < src.size())
-                {
-                    indentifier += at; 
-                    i++;
-                    if (i < src.size()) at = src.at(i);
-                }
-
-                if (keywords.words.find(indentifier) != keywords.words.end()){
-                    tokens.emplace_back(indentifier, keywords.words[indentifier]);
+                if (at == '.'){
+                    num += at;
+                    while (isint(at) && i < src.size()){
+                        num += at;
+                        i++;
+                        at = src.at(i);
+                    }
+                    result.emplace_back(num, TokenType::Number);
                 } else {
-                    tokens.emplace_back(indentifier, Identifier);
+                    result.emplace_back(num, TokenType::Integer);
                 }
-                
-            } else if (at == ' ' || at == '\t' || at == '\n'){
-                
+            
+            } else if (isalpha(at)){
+                string str = "";
+                while (isalpha(at) && i < src.size()){
+                    str += at;
+                    i++;
+                    at = src.at(i);
+                }
+                result.emplace_back(str, TokenType::Identifier);
+            } else if (at == ' ' || at == '\n' || at == '\t') {
+
             } else {
-                cout << "WTF did you type\n" << "we dont know how to handle this character " << i << endl;
-                return {{"Error: unrecognized character" + at, ERROR}};
+                result.emplace_back(at, TokenType::ERROR);
+                break;
             }
-
         }
-
-
-    }
-
-    tokens.emplace_back("EOF", END);
-
-
-
-    return tokens;
-}
-
-
-
-
-
-int main(){
-    string filepath;
-    cin >> filepath;
-    if (filepath == ""){
-        filepath = "./main.sly";
-    }
-    ifstream file(filepath);
-    string code;
-    KeyWords keywords;
-
-    if (file.is_open()) {
-        string data;
-        while (getline(file, data)) {
-            code += data;
-        };
-        file.close();
-    } else {
-        cout << "Error opening file!" << endl;
     }
 
 
-    vector<Token> tokens = tokenize(code);
-    for (int i = 0; i < tokens.size(); i++){
-        cout << tokens[i] << endl;
-
-    }
-
-
+    result.emplace_back("", TokenType::EOF_Token);
+    return result;
 }
