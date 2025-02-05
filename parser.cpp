@@ -74,16 +74,18 @@ class Parser{
 
     Node* parse_additive_expr(){
         Node* left = parse_multiplicative_expr();
-        BinaryExpr* binop;
+        Node* binop = left;
 
         while (tokens.at(index).value == "+" || tokens.at(index).value == "-"){
             string op = tokens.at(index).value;
             index++;
             Node* right = parse_multiplicative_expr();
-            binop = new BinaryExpr();
-            static_cast<BinaryExpr>(binop)->left = left;
-            static_cast<BinaryExpr>(binop)->right = right;
-            static_cast<BinaryExpr>(binop)->op = op;
+            BinaryExpr* newbinop = new BinaryExpr();
+            newbinop->left = left;
+            newbinop->right = right;
+            newbinop->op = op;
+
+            binop = newbinop;
         }
 
         return binop;
@@ -91,16 +93,18 @@ class Parser{
 
     Node* parse_multiplicative_expr(){
         Node* left = parse_primary_expr();
-        Node* binop;
+        Node* binop = left;
 
         while (tokens.at(index).value == "/" || tokens.at(index).value == "*" || tokens.at(index).value == "%" ){
             string op = tokens.at(index).value;
             index++;
             Node* right = parse_multiplicative_expr();
-            binop = new BinaryExpr();
-            static_cast<BinaryExpr>(binop)->left = left;
-            static_cast<BinaryExpr>(binop)->right = right;
-            static_cast<BinaryExpr>(binop)->op = op;
+            BinaryExpr* newbinop = new BinaryExpr();
+            newbinop->left = left;
+            newbinop->right = right;
+            newbinop->op = op;
+
+            binop = newbinop;
         }
 
         return binop;
