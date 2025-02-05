@@ -136,6 +136,7 @@ vector<Token> tokenize(string sourceCode){
                 }
                 if (isKeyWord(str)){
                     result.emplace_back(str, keyWords.at(str));
+                    cout << str << endl;
                 } else {
                     result.emplace_back(str, TokenType::IdentifierToken);
                 }

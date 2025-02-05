@@ -1,5 +1,5 @@
 RunType Normal;
 
-public Main{
+public class Main{
     int hehehe = 0;
 }

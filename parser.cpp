@@ -25,24 +25,39 @@ class Parser{
 
         for (int i =0; i < tokens.size(); i++){
             index = i;
-            Token at = tokens.at(i);
+            Token at = tokens.at(index);
 
             if (at.kind == TokenType::FileType){
-                i++;
-                at = tokens.at(i);
+                index++;
+                at = tokens.at(index);
                 if (at.kind == TokenType::Runtype) {
                     result.runtype = new NormalRun(); //for now it will allways be normal
                 } else{
-                    cout << "Error at token " + at.value << " At index: " << i;
+                    cout << "Error at token " + at.value << " At index: " << index << endl;
                     break;
                 }
-            } else if (i == 0) {
+            } else if (index == 0) {
                 result.runtype = new NormalRun();
-            } else if (tokens.at(index).kind == TokenType::Protection && tokens.at(index + 1).value == "Main"){
-                parseBody = true;
+            } else if (tokens.at(index).kind == TokenType::Protection){
+                if (tokens.at(index + 1).value == "Main"){
+                    parseBody = true;
+                    index++;
+                } else {
+                    cout << "Error at token \"" + tokens.at(index + 1).value << "\" At index: " << index << endl;
+                    cout << "The correct way to create the main class is:" << endl;
+                    cout << "(public|private) Main{\n\t\"Your code here\"\n}" << endl;
+                    break;
+                }
+                
             } else if (parseBody){
                 lastNode = parse_expr();
                 result.body.push_back(lastNode);
+            } else if (tokens.at(index).kind == TokenType::SemiColon){
+            } else {
+                cout << "Error at token " + at.value << "type: " << at.kind << " At index: " << index << endl;
+                cout << "The correct way to create the main class is:" << endl;
+                cout << "(public|private) Main{\n\t\"Your code here\"\n}" << endl;
+                break;
             }
             i = index;
         }
