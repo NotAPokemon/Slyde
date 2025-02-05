@@ -1,0 +1,5 @@
+RunType Normal;
+
+public Main{
+    int hehehe = 0;
+}

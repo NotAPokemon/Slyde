@@ -20,13 +20,38 @@ enum TokenType {
     BinaryOperator,
     EOF_Token,
     SemiColon,
+    NormalRuntype,
+    FileType,
+    Class,
+    Protection,
+    null,
     ERROR,
 };
+
+
+unordered_map<string, TokenType> keyWords = {
+    {"Null", TokenType::null},
+    {"null", TokenType::null},
+    {"RunType", TokenType::FileType},
+    {"class", TokenType::Class},
+    {"private", TokenType::Protection},
+    {"public", TokenType::Protection},
+    {"protected", TokenType::Protection},
+    {"Normal", TokenType::NormalRuntype}
+};
+
+bool isKeyWord(string word){
+    return (keyWords.find(word) != keyWords.end());
+}
+
+   
 
 
 struct Token{
     TokenType kind;
     string value;
+
+    Token(string b, TokenType k) : value(b), kind(k) {}
 };
 
 
@@ -55,25 +80,25 @@ vector<Token> tokenize(string sourceCode){
     for (int i = 0; i < src.size(); i++){
         char at = src.at(i);
         if (at == '('){
-            result.emplace_back(at, TokenType::OpenParentheses);
+            result.emplace_back(string(1, at), TokenType::OpenParentheses);
         } else if (at == ')') {
-            result.emplace_back(at, TokenType::ClosedParentheses);
+            result.emplace_back(string(1, at), TokenType::ClosedParentheses);
         } else if (at == '{') {
-            result.emplace_back(at, TokenType::OpenBracket);
+            result.emplace_back(string(1, at), TokenType::OpenBracket);
         } else if (at == '}') {
-            result.emplace_back(at, TokenType::ClosedBracket);
+            result.emplace_back(string(1, at), TokenType::ClosedBracket);
         } else if (at == ';') {
-            result.emplace_back(at, TokenType::SemiColon);
+            result.emplace_back(string(1, at), TokenType::SemiColon);
         } else if (at == '=') {
-            result.emplace_back(at, TokenType::Equals);
+            result.emplace_back(string(1, at), TokenType::Equals);
         } else if (at == '\''){
-            result.emplace_back(at, TokenType::SingleQuotes);
+            result.emplace_back(string(1, at), TokenType::SingleQuotes);
         } else if (at == '"'){
-            result.emplace_back(at, TokenType::DoubleQuotes);
+            result.emplace_back(string(1, at), TokenType::DoubleQuotes);
         } else if (at == '+' || at == '-') {
-            result.emplace_back(at, TokenType::BinaryOperator);
+            result.emplace_back(string(1, at), TokenType::BinaryOperator);
         } else if (at == '*' || at == '/') {
-            result.emplace_back(at, TokenType::BinaryOperator);
+            result.emplace_back(string(1, at), TokenType::BinaryOperator);
         } else {
             if (isint(at)){
                 string num = "";
@@ -93,6 +118,7 @@ vector<Token> tokenize(string sourceCode){
                 } else {
                     result.emplace_back(num, TokenType::Integer);
                 }
+                i--;
             
             } else if (isalpha(at)){
                 string str = "";
@@ -101,11 +127,16 @@ vector<Token> tokenize(string sourceCode){
                     i++;
                     at = src.at(i);
                 }
-                result.emplace_back(str, TokenType::Identifier);
+                if (isKeyWord(str)){
+                    result.emplace_back(str, keyWords.at(str));
+                } else {
+                    result.emplace_back(str, TokenType::Identifier);
+                }
+                i--;
             } else if (at == ' ' || at == '\n' || at == '\t') {
 
             } else {
-                result.emplace_back(at, TokenType::ERROR);
+                result.emplace_back(string(1, at), TokenType::ERROR);
                 break;
             }
         }
@@ -115,3 +146,6 @@ vector<Token> tokenize(string sourceCode){
     result.emplace_back("", TokenType::EOF_Token);
     return result;
 }
+
+
+

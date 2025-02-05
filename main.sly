@@ -1,6 +1,6 @@
 // goal: get this line and following code to work
 
-public class Main {
+public Main {
   String word;
   String word2 = "this is the second word";
 
