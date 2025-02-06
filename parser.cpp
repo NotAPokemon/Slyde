@@ -38,9 +38,10 @@ class Parser{
                 }
             } else if (index == 0) {
                 result.runtype = new NormalRun();
-            } else if (tokens.at(index).kind == TokenType::Protection){
+            } else if (tokens.at(index).kind == TokenType::Protection && !parseBody){
                 if (tokens.at(index + 1).value == "Main"){
                     parseBody = true;
+                    result.protection = tokens.at(index).value;
                     index++;
                 } else {
                     cout << "Error at token \"" + tokens.at(index + 1).value << "\" At index: " << index << endl;
@@ -113,36 +114,77 @@ class Parser{
     Node* parse_primary_expr(){
         TokenType tk = tokens.at(index).kind;
         string v = tokens.at(index).value;
+        Null* n = new Null(); 
 
-        switch (tk)
-        {
-        case TokenType::IdentifierToken:
+        if(tk == TokenType::IdentifierToken){
             index++;
             return new Identifier(tokens.at(index).value);
-        case TokenType::Number:
+        } else if (tk == TokenType::Number){
             index++;
             return new NumberLiteral(stod(v));
-        case TokenType::Integer:
+        } else if (tk == TokenType::Integer){
             index++;
             return new IntegerLiteral(stoi(v));
-        case TokenType::OpenParentheses:
+        } else if (tk == TokenType::OpenParentheses){
             index++;
             Node* value = parse_expr();
             if (tokens.at(index).kind != TokenType::ClosedParentheses){
                 cout << "Expected: ) but instead found (" << tokens.at(index).value << ")" << endl;
-                break;
+                return n;
             }
             index++;
             return value;
+        } else if (tk == TokenType::typeDecleration) {
+            VarDec* var = new VarDec();
+            var->type = tokens.at(index).value;
+            index++;
+            Token indent = tokens.at(index);
+            string Namevalue;
+            if (indent.kind == TokenType::IdentifierToken){
+                Namevalue = indent.value;
+            } else {
+                cout << "Expected: Identifier but instead found \"" << tokens.at(index).value << "\"" << endl;
+                return n;
+            }
+            var->name = new Identifier(Namevalue);
+            index++;
+            if (tokens.at(index).kind != TokenType::Equals){
+                Node* varValue = parse_expr();
+                var->value = varValue;
+            } else if (tokens.at(index).kind != TokenType::SemiColon){
+            } else {
+                if (tokens.at(index).kind != TokenType::ClosedParentheses){
+                cout << "Expected: = but instead found \"" << tokens.at(index).value << "\"" << endl;
+                return n;
+            }
+            }
+            return var;
         }
+            
 
-
+        return n;
     }
 
 };
 
 
+string toString(MainClassDef main){
+    string result = "{\n\tkind: \"Main\",\n\tprotection: \"" + main.protection + "\",";
+    result += "\n\tbody: {\n";
+    for (int i = 0; i < main.body.size(); i++){
+        Node* at = main.body.at(i);
+        if (isInstance<Identifier, Node>(at)){
+            result += "\t\tIdentifier: \"" + static_cast<Identifier*>(at)->value + "\",";
+        } else if (isInstance<BinaryExpr, Node>(at)){
+            result += "\t\tBinaryExpr: \"" + static_cast<BinaryExpr*>(at)->op + "\",";
+        } else if (isInstance<VarDec, Node>(at)){
+            result += "\t\tVarDec: Type:\"" + static_cast<VarDec*>(at)->type +  + "\",";
+        }
 
+    }
+    result += "}";
+    return result;
+};
 
 
 
@@ -162,7 +204,7 @@ int main(){
 
     MainClassDef run = parser.produceAST(tokens);
 
-    cout << run.body.at(0) << endl;
+    cout << toString(run) << endl;
 
 
 

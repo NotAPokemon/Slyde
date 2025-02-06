@@ -116,6 +116,8 @@ vector<Token> tokenize(string sourceCode){
                 }
                 if (at == '.'){
                     num += at;
+                    i++;
+                    at = src.at(i);
                     while (isint(at) && i < src.size()){
                         num += at;
                         i++;
@@ -136,7 +138,6 @@ vector<Token> tokenize(string sourceCode){
                 }
                 if (isKeyWord(str)){
                     result.emplace_back(str, keyWords.at(str));
-                    cout << str << endl;
                 } else {
                     result.emplace_back(str, TokenType::IdentifierToken);
                 }
