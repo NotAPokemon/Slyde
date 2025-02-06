@@ -125,6 +125,17 @@ class Parser{
         } else if (tk == TokenType::Integer){
             index++;
             return new IntegerLiteral(stoi(v));
+        } else if(tk == TokenType::Boolean){
+            index++;
+            bool boolValue;
+            switch (v){
+                case "true":
+                    boolValue = true;
+                case "false":
+                    boolValue = false;
+
+            }
+            return new BooleanLiteral(v);
         } else if (tk == TokenType::OpenParentheses){
             index++;
             Node* value = parse_expr();

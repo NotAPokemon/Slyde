@@ -55,6 +55,12 @@ class IntegerLiteral : public Literal {
     IntegerLiteral(int v) : value(v) {}
 };
 
+class BooleanLiteral : public Literal{
+    public:
+    bool value;
+    BooleanLiteral(bool v) : value(v) {}
+};
+
 class Identifier : public Node{
     public:
     string value;

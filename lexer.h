@@ -14,6 +14,7 @@ using namespace std;
 enum TokenType {
     Number,
     Integer,
+    Boolean,
     IdentifierToken,
     Equals,
     OpenParentheses, ClosedParentheses,
@@ -44,7 +45,10 @@ unordered_map<string, TokenType> keyWords = {
     {"Normal", TokenType::Runtype},
     {"int", TokenType::typeDecleration},
     {"String", TokenType::typeDecleration},
-    {"Number", TokenType::typeDecleration}
+    {"Number", TokenType::typeDecleration},
+    {"bool", TokenType::typeDecleration},
+    {"true", TokenType::Boolean},
+    {"false", TokenType::Boolean}
 };
 
 bool isKeyWord(string word){
