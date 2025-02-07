@@ -22,6 +22,7 @@ class Parser{
         this->tokens = tokensArray;
         Node* lastNode;
         bool parseBody = false;
+        Enviorment* currentEnv = result.env;
 
 
         for (int i =0; i < tokens.size(); i++){
@@ -168,7 +169,7 @@ class Parser{
                 return n;
             }
             }
-            result.vars.push_back(var);
+            result->env.vars.push_back(var);
             return var;
         }
             
