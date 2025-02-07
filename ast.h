@@ -21,6 +21,13 @@ class Null : public Node{
 class Literal : public Node{
 };
 
+class Enviorment : public Node{
+    vector<VarDec*> vars;
+    vector<MethodDec*> methods;
+    Enviorment* parent;
+    vector<Enviorment*> children;
+};
+
 class RunType : public Node{
 };
 
@@ -86,8 +93,7 @@ class MainClassDef : public Node {
     vector<Node*> body;
     string protection;
     RunType* runtype;
-    vector<VarDec*> vars;
-    vector<MethodDec*> methods;
+    Enviorment* env;
     const Identifier name = Identifier("Main");
     MainClassDef(){}
 };
