@@ -22,7 +22,7 @@ class Parser{
         this->tokens = tokensArray;
         Node* lastNode;
         bool parseBody = false;
-        Enviorment* currentEnv = result.env;
+        Enviorment* currentEnv = result->env;
 
 
         for (int i =0; i < tokens.size(); i++){
