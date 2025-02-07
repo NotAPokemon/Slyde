@@ -2,4 +2,5 @@ RunType Normal;
 
 public Main{
     Number hehehe = 0.0 + 0;
+    bool myBool = true;
 }

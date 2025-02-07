@@ -11,13 +11,14 @@ class Parser{
     public:
     int index;
     vector<Token> tokens;
+    MainClassDef result;
 
 
 
 
     MainClassDef produceAST(vector<Token> tokensArray){
 
-        MainClassDef result;
+        
         this->tokens = tokensArray;
         Node* lastNode;
         bool parseBody = false;
@@ -82,7 +83,7 @@ class Parser{
             index++;
             Node* right = parse_multiplicative_expr();
             BinaryExpr* newbinop = new BinaryExpr();
-            newbinop->left = left;
+            newbinop->left = binop;
             newbinop->right = right;
             newbinop->op = op;
 
@@ -101,7 +102,7 @@ class Parser{
             index++;
             Node* right = parse_multiplicative_expr();
             BinaryExpr* newbinop = new BinaryExpr();
-            newbinop->left = left;
+            newbinop->left = binop;
             newbinop->right = right;
             newbinop->op = op;
 
@@ -127,18 +128,14 @@ class Parser{
             return new IntegerLiteral(stoi(v));
         } else if(tk == TokenType::Boolean){
             index++;
-            bool boolValue;
-            switch (v){
-                case "true":
-                    boolValue = true;
-                case "false":
-                    boolValue = false;
-
+            bool boolValue = false;
+            if(v == "true"){
+                boolValue = true;
             }
-            return new BooleanLiteral(v);
+            return new BooleanLiteral(boolValue);
         } else if (tk == TokenType::OpenParentheses){
             index++;
-            Node* value = parse_expr();
+            Node* value = parse_additive_expr();
             if (tokens.at(index).kind != TokenType::ClosedParentheses){
                 cout << "Expected: ) but instead found (" << tokens.at(index).value << ")" << endl;
                 return n;
@@ -159,16 +156,19 @@ class Parser{
             }
             var->name = new Identifier(Namevalue);
             index++;
-            if (tokens.at(index).kind != TokenType::Equals){
+            if (tokens.at(index).kind == TokenType::Equals){
+                index++;
                 Node* varValue = parse_expr();
                 var->value = varValue;
-            } else if (tokens.at(index).kind != TokenType::SemiColon){
+            } else if (tokens.at(index).kind == TokenType::SemiColon){
+                index++;
             } else {
                 if (tokens.at(index).kind != TokenType::ClosedParentheses){
                 cout << "Expected: = but instead found \"" << tokens.at(index).value << "\"" << endl;
                 return n;
             }
             }
+            result.vars.push_back(var);
             return var;
         }
             
@@ -178,22 +178,35 @@ class Parser{
 
 };
 
+string nodeToString(Node* at){
+    string result = "";
+    if (isInstance<Identifier, Node>(at)){
+        result += "\t\tIdentifier: \"" + static_cast<Identifier*>(at)->value + "\",\n";
+    } else if (isInstance<BinaryExpr, Node>(at)){
+        string left = nodeToString(static_cast<BinaryExpr*>(at)->left);
+        left.pop_back();
+        left.pop_back();
+        string right = nodeToString(static_cast<BinaryExpr*>(at)->right);
+        result += "\t\tBinaryExpr:\n\t\t\t" + left + " \n\t\t\t\t\tOperator: " + static_cast<BinaryExpr*>(at)->op + "\n\t\t\t" + right + ",\n";
+    } else if (isInstance<VarDec, Node>(at)){
+        result += "\t\tVarDec: \n\t\t\tType:\"" + static_cast<VarDec*>(at)->type + "\",\n\t\t\tName: " + static_cast<VarDec*>(at)->name->value + ",\n\t\t\tValue:\n\t\t" + nodeToString(static_cast<VarDec*>(at)->value) + ",\n";
+    } else if (isInstance<NumberLiteral, Node>(at)){
+        result += "\t\tNumberLiteral: \"" + to_string(static_cast<NumberLiteral*>(at)->value) + "\",\n";
+    }  else if (isInstance<IntegerLiteral, Node>(at)){
+        result += "\t\tIntegerLiteral: \"" + to_string(static_cast<IntegerLiteral*>(at)->value) + "\",\n";
+    }
+    return result;
+}
 
 string toString(MainClassDef main){
     string result = "{\n\tkind: \"Main\",\n\tprotection: \"" + main.protection + "\",";
     result += "\n\tbody: {\n";
     for (int i = 0; i < main.body.size(); i++){
         Node* at = main.body.at(i);
-        if (isInstance<Identifier, Node>(at)){
-            result += "\t\tIdentifier: \"" + static_cast<Identifier*>(at)->value + "\",";
-        } else if (isInstance<BinaryExpr, Node>(at)){
-            result += "\t\tBinaryExpr: \"" + static_cast<BinaryExpr*>(at)->op + "\",";
-        } else if (isInstance<VarDec, Node>(at)){
-            result += "\t\tVarDec: Type:\"" + static_cast<VarDec*>(at)->type +  + "\",";
-        }
+        result += nodeToString(at);
 
     }
-    result += "}";
+    result += "\t}\n}";
     return result;
 };
 
@@ -219,5 +232,5 @@ int main(){
 
 
 
-    return 0;
+    return 1;
 }

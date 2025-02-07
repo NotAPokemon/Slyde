@@ -35,14 +35,6 @@ class MethodExpr : public Node{
     string returnType;
 };
 
-class MethodDec : public MethodExpr{
-    public:
-    Node* params;
-    string returnType;
-    vector<Node*> body;
-    Identifier name;
-};
-
 class NumberLiteral : public Literal {
     public:
     double value;
@@ -77,6 +69,16 @@ class VarDec : public Node{
 class VarAssignment : public Node{
 
 };
+
+class MethodDec : public MethodExpr{
+    public:
+    Node* params;
+    string returnType;
+    vector<Node*> body;
+    Identifier name;
+    string Protection;
+};
+
 
 class MainClassDef : public Node {
     public:
