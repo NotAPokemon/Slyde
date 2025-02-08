@@ -12,7 +12,7 @@ class Parser{
     int index;
     vector<Token> tokens;
     MainClassDef result;
-
+    Enviorment* currentEnv = result.env;
 
 
 
@@ -22,8 +22,7 @@ class Parser{
         this->tokens = tokensArray;
         Node* lastNode;
         bool parseBody = false;
-        Enviorment* currentEnv = result->env;
-
+        
 
         for (int i =0; i < tokens.size(); i++){
             index = i;
@@ -116,7 +115,7 @@ class Parser{
     Node* parse_primary_expr(){
         TokenType tk = tokens.at(index).kind;
         string v = tokens.at(index).value;
-        Null* n = new Null(); 
+        Blank* n = new Blank(); 
 
         if(tk == TokenType::IdentifierToken){
             index++;
@@ -169,7 +168,7 @@ class Parser{
                 return n;
             }
             }
-            result->env.vars.push_back(var);
+            currentEnv->vars.push_back(var);
             return var;
         }
             
@@ -177,38 +176,6 @@ class Parser{
         return n;
     }
 
-};
-
-string nodeToString(Node* at){
-    string result = "";
-    if (isInstance<Identifier, Node>(at)){
-        result += "\t\tIdentifier: \"" + static_cast<Identifier*>(at)->value + "\",\n";
-    } else if (isInstance<BinaryExpr, Node>(at)){
-        string left = nodeToString(static_cast<BinaryExpr*>(at)->left);
-        left.pop_back();
-        left.pop_back();
-        string right = nodeToString(static_cast<BinaryExpr*>(at)->right);
-        result += "\t\tBinaryExpr:\n\t\t\t" + left + " \n\t\t\t\t\tOperator: " + static_cast<BinaryExpr*>(at)->op + "\n\t\t\t" + right + ",\n";
-    } else if (isInstance<VarDec, Node>(at)){
-        result += "\t\tVarDec: \n\t\t\tType:\"" + static_cast<VarDec*>(at)->type + "\",\n\t\t\tName: " + static_cast<VarDec*>(at)->name->value + ",\n\t\t\tValue:\n\t\t" + nodeToString(static_cast<VarDec*>(at)->value) + ",\n";
-    } else if (isInstance<NumberLiteral, Node>(at)){
-        result += "\t\tNumberLiteral: \"" + to_string(static_cast<NumberLiteral*>(at)->value) + "\",\n";
-    }  else if (isInstance<IntegerLiteral, Node>(at)){
-        result += "\t\tIntegerLiteral: \"" + to_string(static_cast<IntegerLiteral*>(at)->value) + "\",\n";
-    }
-    return result;
-}
-
-string toString(MainClassDef main){
-    string result = "{\n\tkind: \"Main\",\n\tprotection: \"" + main.protection + "\",";
-    result += "\n\tbody: {\n";
-    for (int i = 0; i < main.body.size(); i++){
-        Node* at = main.body.at(i);
-        result += nodeToString(at);
-
-    }
-    result += "\t}\n}";
-    return result;
 };
 
 
@@ -229,7 +196,10 @@ int main(){
 
     MainClassDef run = parser.produceAST(tokens);
 
-    cout << toString(run) << endl;
+
+    IndentManager manager = IndentManager();
+
+    cout << run.toString(manager) << endl;
 
 
 
