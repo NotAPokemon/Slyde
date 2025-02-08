@@ -61,12 +61,6 @@ class NormalRun : public RunType{
     }
 };
 
-class MethodExpr : public Node{
-    public:
-    Node* params;
-    string returnType;
-};
-
 class NumberLiteral : public Literal {
     public:
     double value;
@@ -101,22 +95,25 @@ class Identifier : public Node{
     string toString(IndentManager m) const override{
         return value;
     }
+    Identifier(){};
 };
 
 class VarDec : public Node{
     public:
     string type;
+    string protection;
     Identifier* name;
     Node* value;
     string toString(IndentManager m) const override{
         string result = m.getIndent() + "Variable Declaration: {\n";
     
         m.increase();
+        result += m.getIndent() + "Protection: " + protection + ",\n";
         result += m.getIndent() + "Name: \"" + name->toString(m) + "\",\n";
-        result += m.getIndent() + "Type: \"" + type + "\",\n";
+        result += m.getIndent() + "Type: " + type + ",\n";
         if (isInstance<Literal, Node>(value)){
             result += m.getIndent() + "Value: " + value->toString(m) + "\n";
-        } else {
+        } else if (value) {
             result += m.getIndent() + "Value: \n";
             m.increase();
             result += value->toString(m) + "\n";
@@ -135,15 +132,46 @@ class VarAssignment : public Node{
 
 };
 
-class MethodDec : public MethodExpr{
+class Enviorment;
+
+
+class Return : public Node{
+    
+};
+
+class MethodDec : public Node{
     public:
-    Node* params;
     string returnType;
     vector<Node*> body;
-    Identifier name;
+    Identifier* name;
     string Protection;
+    Enviorment* env;
+    MethodDec(){};
     string toString(IndentManager m) const override{
-        return "fix MethodDec to string";
+        string result = m.getIndent() + "Method Decleration:\n";
+        m.increase();
+        result +=  m.getIndent() + "{\n";
+    
+        m.increase();
+        result += m.getIndent() + "Name: \"" + name->toString(m) + "\",\n";
+        result += m.getIndent() + "Protection: {" + Protection + "},\n";
+        
+        result += m.getIndent() + "Body: {\n";
+        m.increase();
+        
+        for (Node* n : body) {
+            if (!isInstance<Blank, Node>(n)){
+                result += n->toString(m) + ",\n";
+            }
+        }
+        
+        m.decrease();
+        result += m.getIndent() + "}\n";
+        
+        m.decrease();
+        result += m.getIndent() + "}";
+
+        return result;
     }
 };
 
@@ -209,9 +237,17 @@ class BinaryExpr : public Node {
         string result = m.getIndent() + "BinaryExpr: {\n";
     
         m.increase();
-        result += m.getIndent() + "Left: " + left->toString(m) + ",\n";
+        if (isInstance<BinaryExpr, Node>(left)){
+            result += m.getIndent() + "Left:\n" + left->toString(m) + ",\n";
+        } else {
+            result += m.getIndent() + "Left: " + left->toString(m) + ",\n";
+        }
         result += m.getIndent() + "Operator: \"" + op + "\",\n";
-        result += m.getIndent() + "Right: " + right->toString(m) + "\n";
+        if (isInstance<BinaryExpr, Node>(right)){
+            result += m.getIndent() + "Right:\n" + right->toString(m) + ",\n";
+        } else {
+            result += m.getIndent() + "Right: " + right->toString(m) + ",\n";
+        }
         m.decrease();
         
         result += m.getIndent() + "}";

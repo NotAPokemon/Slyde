@@ -112,6 +112,91 @@ class Parser{
         return binop;
     }
 
+    Node* parse_decleration(string protection = "private", bool skip = true){
+        string type;
+        if (skip){
+            type = tokens.at(index).value;
+        } else {
+            index++;
+            //later do some checks to see if its a user defined type for now we will pass everything
+            type = tokens.at(index).value;
+        }
+        
+        index++;
+        Token indent = tokens.at(index);
+        string Namevalue;
+        if (indent.kind == TokenType::IdentifierToken){
+            Namevalue = indent.value;
+        } else {
+            cout << "Expected: Identifier but instead found \"" << tokens.at(index).value << "\"" << endl;
+            throw new runtime_error("");
+        }
+        Identifier* name = new Identifier(Namevalue);
+        index++;
+        if (tokens.at(index).kind == TokenType::Equals){
+            VarDec* var = new VarDec();
+            var->name = name;
+            var->type = type;
+            var->protection = protection;
+            index++;
+            Node* varValue = parse_expr();
+            var->value = varValue;
+            return var;
+        } else if (tokens.at(index).kind == TokenType::SemiColon || tokens.at(index).kind == TokenType::Comma){
+            VarDec* var = new VarDec();
+            var->name = name;
+            var->type = type;
+            var->protection = protection;
+            index++;
+            return var;
+        } else if (tokens.at(index).kind == TokenType::OpenParentheses){
+            MethodDec* var = new MethodDec();
+            var->returnType = type;
+            var->env = new Enviorment();
+            var->name = name;
+            var->Protection = protection;
+            currentEnv->children.push_back(var->env);
+            var->env->parent = currentEnv;
+            index++;
+            Token at = tokens.at(index);
+            while (at.kind != TokenType::ClosedParentheses)
+            {
+                Node* pararm = parse_expr();
+                at = tokens.at(index);
+            }
+            index++;
+            if (tokens.at(index).kind == TokenType::OpenBracket){
+                index++;
+                while (at.kind != TokenType::ClosedBracket)
+                {
+                    var->body.push_back(parse_expr());
+                    at = tokens.at(index);
+                }
+                index++;
+                currentEnv = currentEnv->parent;
+            } else {
+                throw new runtime_error("Expected: { but instead found \"" + string(at.value) + "\"");
+            }
+            return var;
+
+
+        } else {
+            if (tokens.at(index).kind != TokenType::ClosedParentheses){
+                cout << "Expected: ['(' | '=' | ';'] but instead found \"" << tokens.at(index).value << "\"" << endl;
+                throw new runtime_error("");
+            }
+        }
+    }
+
+    void handleEnviormentSetup(Node* var){
+        if (isInstance<VarDec, Node>(var)){
+            currentEnv->vars.push_back(static_cast<VarDec*>(var));
+        } else if (isInstance<MethodDec, Node>(var)){
+            MethodDec* m = static_cast<MethodDec*>(var);
+            currentEnv->methods.push_back(m);
+        }
+    }
+
     Node* parse_primary_expr(){
         TokenType tk = tokens.at(index).kind;
         string v = tokens.at(index).value;
@@ -143,32 +228,12 @@ class Parser{
             index++;
             return value;
         } else if (tk == TokenType::typeDecleration) {
-            VarDec* var = new VarDec();
-            var->type = tokens.at(index).value;
-            index++;
-            Token indent = tokens.at(index);
-            string Namevalue;
-            if (indent.kind == TokenType::IdentifierToken){
-                Namevalue = indent.value;
-            } else {
-                cout << "Expected: Identifier but instead found \"" << tokens.at(index).value << "\"" << endl;
-                return n;
-            }
-            var->name = new Identifier(Namevalue);
-            index++;
-            if (tokens.at(index).kind == TokenType::Equals){
-                index++;
-                Node* varValue = parse_expr();
-                var->value = varValue;
-            } else if (tokens.at(index).kind == TokenType::SemiColon){
-                index++;
-            } else {
-                if (tokens.at(index).kind != TokenType::ClosedParentheses){
-                cout << "Expected: = but instead found \"" << tokens.at(index).value << "\"" << endl;
-                return n;
-            }
-            }
-            currentEnv->vars.push_back(var);
+            Node* var = parse_decleration();
+            handleEnviormentSetup(var);
+            return var;
+        } else if (tk == TokenType::Protection) {
+            Node* var = parse_decleration(v, false);
+            handleEnviormentSetup(var);
             return var;
         }
             

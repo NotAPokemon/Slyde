@@ -24,6 +24,8 @@ enum TokenType {
     BinaryOperator,
     EOF_Token,
     SemiColon,
+    Comma,
+    ReturnToken,
     Runtype,
     FileType,
     Class,
@@ -48,7 +50,8 @@ unordered_map<string, TokenType> keyWords = {
     {"Number", TokenType::typeDecleration},
     {"bool", TokenType::typeDecleration},
     {"true", TokenType::Boolean},
-    {"false", TokenType::Boolean}
+    {"false", TokenType::Boolean},
+    {"return", TokenType::ReturnToken}
 };
 
 bool isKeyWord(string word){
@@ -106,6 +109,8 @@ vector<Token> tokenize(string sourceCode){
             result.emplace_back(string(1, at), TokenType::SingleQuotes);
         } else if (at == '"'){
             result.emplace_back(string(1, at), TokenType::DoubleQuotes);
+        } else if (at == ','){
+            result.emplace_back(string(1,at), TokenType::Comma);
         } else if (at == '+' || at == '-') {
             result.emplace_back(string(1, at), TokenType::BinaryOperator);
         } else if (at == '*' || at == '/' || at == '%') {
