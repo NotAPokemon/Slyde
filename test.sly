@@ -8,6 +8,6 @@ public Main{
         String test = "kys";
         bool tester = true;
 
-        return test;
+        return 1;
     }
 }
