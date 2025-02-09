@@ -14,6 +14,7 @@ using namespace std;
 enum TokenType {
     Number,
     Integer,
+    String,
     Boolean,
     IdentifierToken,
     Equals,
@@ -106,9 +107,25 @@ vector<Token> tokenize(string sourceCode){
         } else if (at == '=') {
             result.emplace_back(string(1, at), TokenType::Equals);
         } else if (at == '\''){
-            result.emplace_back(string(1, at), TokenType::SingleQuotes);
+            string v = "";
+            i++;
+            at = src.at(i);
+            while (at != '\'' && i < src.size()){
+                v += at;
+                i++;
+                at = src.at(i);
+            }
+            result.emplace_back(v, TokenType::String);
         } else if (at == '"'){
-            result.emplace_back(string(1, at), TokenType::DoubleQuotes);
+            string v = "";
+            i++;
+            at = src.at(i);
+            while (at != '"' && i < src.size()){
+                v += at;
+                i++;
+                at = src.at(i);
+            }
+            result.emplace_back(v, TokenType::String);
         } else if (at == ','){
             result.emplace_back(string(1,at), TokenType::Comma);
         } else if (at == '+' || at == '-') {

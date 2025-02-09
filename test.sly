@@ -4,7 +4,10 @@ public Main{
     Number var = 1;
     bool booleanVar = true;
 
-    int main(){
-        int test;
+    int main(int oops, bool hee){
+        String test = "kys";
+        bool tester = true;
+
+        return test;
     }
 }

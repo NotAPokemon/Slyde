@@ -69,9 +69,8 @@ class Parser{
 
 
     Node* parse_expr(){
-
-        return parse_additive_expr();
-
+        Node* var = parse_additive_expr();
+        return var;
     }
 
     Node* parse_additive_expr(){
@@ -112,7 +111,7 @@ class Parser{
         return binop;
     }
 
-    Node* parse_decleration(string protection = "private", bool skip = true){
+    Node* parse_decleration(string protection = "private", bool skip = true, bool parsePar = false){
         string type;
         if (skip){
             type = tokens.at(index).value;
@@ -149,6 +148,12 @@ class Parser{
             var->protection = protection;
             index++;
             return var;
+        } else if ((parsePar && tokens.at(index).kind == TokenType::ClosedParentheses)){
+            VarDec* var = new VarDec();
+            var->name = name;
+            var->type = type;
+            var->protection = protection;
+            return var;
         } else if (tokens.at(index).kind == TokenType::OpenParentheses){
             MethodDec* var = new MethodDec();
             var->returnType = type;
@@ -157,12 +162,15 @@ class Parser{
             var->Protection = protection;
             currentEnv->children.push_back(var->env);
             var->env->parent = currentEnv;
+            currentEnv = var->env;
             index++;
             Token at = tokens.at(index);
+            
             while (at.kind != TokenType::ClosedParentheses)
             {
-                Node* pararm = parse_expr();
+                Node* pararm = parse_decleration(protection, skip, true);
                 at = tokens.at(index);
+                
             }
             index++;
             if (tokens.at(index).kind == TokenType::OpenBracket){
@@ -170,6 +178,10 @@ class Parser{
                 while (at.kind != TokenType::ClosedBracket)
                 {
                     var->body.push_back(parse_expr());
+                    at = tokens.at(index);
+                    if (at.kind == TokenType::SemiColon){
+                        index++;
+                    }
                     at = tokens.at(index);
                 }
                 index++;
@@ -204,7 +216,17 @@ class Parser{
 
         if(tk == TokenType::IdentifierToken){
             index++;
-            return new Identifier(tokens.at(index).value);
+            string n = v;
+            if (tokens.at(index).kind == TokenType::OpenParentheses){
+                vector<Node*> params;
+                while (tokens.at(index).kind != TokenType::ClosedParentheses){
+                    params.push_back(parse_expr());
+                }
+                return new MethodCall(params, new Identifier(n));
+            } else {
+                return new Identifier(n);
+
+            }
         } else if (tk == TokenType::Number){
             index++;
             return new NumberLiteral(stod(v));
@@ -218,6 +240,9 @@ class Parser{
                 boolValue = true;
             }
             return new BooleanLiteral(boolValue);
+        } else if (tk == TokenType::String){
+            index++;
+            return new StringLiteral(v);
         } else if (tk == TokenType::OpenParentheses){
             index++;
             Node* value = parse_additive_expr();
@@ -235,8 +260,11 @@ class Parser{
             Node* var = parse_decleration(v, false);
             handleEnviormentSetup(var);
             return var;
+        } else if(tk == TokenType::ReturnToken){
+            index++;
+            Node* val = parse_expr();
+            return new Return(val);
         }
-            
 
         return n;
     }

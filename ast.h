@@ -88,6 +88,15 @@ class BooleanLiteral : public Literal{
     }
 };
 
+class StringLiteral : public Literal{
+    public:
+    string value;
+    StringLiteral(string v) : value(v) {}
+    string toString(IndentManager m) const override{
+        return value;
+    }
+};
+
 class Identifier : public Node{
     public:
     string value;
@@ -128,15 +137,33 @@ class VarDec : public Node{
     
 };
 
-class VarAssignment : public Node{
-
-};
-
 class Enviorment;
 
 
+
+class MethodCall : public Node{
+    public:
+    Identifier* name;
+    vector<Node*> params;
+    string toString(IndentManager m) const override{
+        return " Call(" + name->value + ")";
+    }
+    MethodCall(vector<Node*> p, Identifier* n) : name(n), params(p) {}
+};
+
+
 class Return : public Node{
-    
+    public:
+    Node* val;
+    string toString(IndentManager m) const override{
+        string str = m.getIndent() + "return {\n";
+        m.increase(); 
+        str += m.getIndent() + val->toString(m) + "\n";
+        m.decrease();
+        str += m.getIndent() + "}";
+        return str;
+    }
+    Return(Node* v) : val(v) {}
 };
 
 class MethodDec : public Node{
